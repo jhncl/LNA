@@ -15,7 +15,7 @@ t=steps+1
 write(file="example1.bug",
 			"model {
 		for (i in 1:27){
-			y[i] ~ dnorm(latent[i*steps+1],nu)
+			y[i] ~ dlnorm(latent[i*steps+1],nu)
 		}				
 		for (j in 2:(steps*27+1)){
 		latent[j]~dnorm(latent[j-1]+(r*latent[j-1]-(r/K)*latent[j-1]*latent[j-1])*dt[j-1],zeta/(dt[j-1]*latent[j-1]*latent[j-1]))
