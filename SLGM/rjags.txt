@@ -1,0 +1,89 @@
+x=read.table("xdata.txt",header=T)[,1]
+y=read.table("ydata.txt",header=T)[,1]
+stepsbetweendatapoints=15
+			steps=stepsbetweendatapoints+1
+			dt=numeric()
+dt[1:steps]=rep(x[1]/steps,steps)
+t=steps+1
+		for (i in 2:27){
+		for (j in 1:steps){
+		dt[t]=(x[i]-x[i-1])/steps
+		t=t+1
+}
+}
+
+write(file="example1.bug",
+			"model {
+		for (i in 1:27){
+			y[i] ~ dnorm(latent[i*steps+1],nu)
+		}				
+		for (j in 2:(steps*27+1)){
+		latent[j]~dnorm(latent[j-1]+(r*latent[j-1]-(r/K)*latent[j-1]*latent[j-1])*dt[j-1],zeta/(dt[j-1]*latent[j-1]*latent[j-1]))
+		}	
+	latent[1]<-P
+	K<-exp(lK)
+	r<-exp(lr)
+	P<-exp(lP)
+	nu <- exp(lnu)
+	zeta <- exp(lzeta)
+	lK ~ dnorm(log(0.1),2)
+	lr ~ dnorm(log(3), 5)
+	lP ~ dnorm(log(0.0001), 0.1)
+	lnu ~ dnorm(log(10000),0.1)
+	lzeta ~ dnorm(log(100),0.1)
+	}"
+)
+
+library('rjags')
+ 
+			 inits=list('lK'=log(0.1),'lr'=log(3),'lP'=log(0.0001),'lzeta'=log(100),'lnu'=log(10000))
+			 
+jags <- jags.model('example1.bug',
+                   data = list('dt' = dt,
+				   'y' = y,
+					   'steps' = steps
+				   ),
+                   n.chains = 1,
+                   n.adapt = 1000,
+				   			 inits = inits)
+date()
+
+update(jags, 100000)
+
+date()
+
+output<-coda.samples(jags,
+             c('K','r','P','zeta','nu'),
+             n.iter=1000,thin=100)
+			 
+date()
+
+			 output1<-output[[1]]
+			 				 save.image("output200k.RData")		 
+
+			update(jags, 100000)
+ 
+output<-coda.samples(jags,
+             c('K','r','P','zeta','nu'),
+             n.iter=1000,thin=100)
+			 output1<-output[[1]]
+
+			 			 				 save.image("output400k.RData")		 
+
+					update(jags, 100000)
+ 
+output<-coda.samples(jags,
+             c('K','r','P','zeta','nu'),
+             n.iter=1000,thin=100)
+			 output1<-output[[1]]
+
+			 			 				 save.image("output600k.RData")	
+										 
+										 				update(jags, 100000)
+ 
+output<-coda.samples(jags,
+             c('K','r','P','zeta','nu'),
+             n.iter=1000,thin=100)
+			 output1<-output[[1]]
+
+			 			 				 save.image("output800k.RData")	
